@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.StudentMapper">
+
+    <resultMap type="com.sdut.laboratorybackmodule.entity.Student" id="StudentResult">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="age" column="age"/>
+        <result property="gender" column="gender"/>
+        <result property="email" column="email"/>
+    </resultMap>
+
+    <sql id="selectStudent">
+        select `id`,`name`,`age`,`gender`,`email` from student
+    </sql>
+
+    <select id="listStudent" resultMap="StudentResult">
+        <include refid="selectStudent"></include>
+    </select>
+
+    <select id="selectStudentById" resultMap="StudentResult">
+        <include refid="selectStudent"></include>
+        where `id` = #{id};
+    </select>
+
+    <insert id="insertStudent" parameterType="com.sdut.laboratorybackmodule.entity.Student" useGeneratedKeys="true">
+        insert into student
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">`name`,</if>
+            <if test="age != null and age != ''">`age`,</if>
+            <if test="gender != null and gender != ''">`gender`,</if>
+            <if test="email != null and email != ''">`email`,</if>
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="age != null and age != ''">#{age},</if>
+            <if test="gender != null and gender != ''">#{gender},</if>
+            <if test="email != null and email != ''">#{email},</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteStudentById" parameterType="integer">
+        delete from student where `id` = #{id}
+    </delete>
+
+    <update id="updateStudent" parameterType="com.sdut.laboratorybackmodule.entity.Student">
+        update student
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name != null and name != ''">`name` = #{name},</if>
+            <if test="age != null and age != ''">`age` = #{age},</if>
+            <if test="gender != null and gender != ''">`gender` = #{gender},</if>
+            <if test="email != null and email != ''">`email` = #{email}</if>
+        </trim>
+        where `id` = #{id}
+    </update>
+</mapper>
