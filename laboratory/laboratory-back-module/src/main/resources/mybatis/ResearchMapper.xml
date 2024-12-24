@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.ResearchMapper" >
+    <resultMap id="BaseResultMap" type="com.sdut.laboratorybackmodule.entity.Research">
+        <id column="id" property="id"/>
+        <result column="intro" property="intro"/>
+        <result column="url" property="url"/>
+        <result column="beginTimes" property="beginTimes"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, intro, url, begin_times, name
+    </sql>
+
+    <insert id="insertResearch" parameterType="com.sdut.laboratorybackmodule.entity.Research" >
+        INSERT INTO research (intro, url, beginTimes, name)
+        VALUES (#{intro}, #{url}, #{beginTimes}, #{name})
+    </insert>
+
+    <select id="getResearchById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM research WHERE id = #{id}
+    </select>
+
+    <select id="getAllResearches" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM research
+    </select>
+
+    <update id="updateResearch" parameterType="com.sdut.laboratorybackmodule.entity.Research" >
+        UPDATE research
+        SET intro = #{intro}, url = #{url}, beginTimes = #{beginTimes}, name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteResearch" parameterType="Long" >
+        DELETE FROM research WHERE id = #{id}
+    </delete>
+</mapper>

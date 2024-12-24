@@ -1,130 +1,99 @@
 <template>
-  <el-container>
-    <!-- width的宽度跟collapse一样动态控制 -->
-    <el-aside width="collapse">
-      <div class="logo" v-show="open"><h3><i class="el-icon-eleme"></i>xxx管理系统</h3></div>
-      <div class="logo" v-show="close"><h3><i class="el-icon-eleme"></i></h3></div>
-      <!-- :collapse="isCollapse"  class="el-menu-vertical" 动态控制导航菜单的收起与展开  router：让index作为 path 进行路由跳转 -->
-      <el-menu default-active="$route.path"
-               router
-               :default-openeds="openeds"
-               :collapse="isCollapse"
-               class="el-menu-vertical">
-        <el-submenu index="1">
-          <!-- 一级标题 -->
-          <template slot="title">
-            <i class="el-icon-s-tools"></i>
-            <span slot="title">后台管理</span>
-          </template>
-          <!--  二级标题 -->
-          <el-menu-item index="/console">
-            <i class="el-icon-setting"></i>
-            <span slot="title">控制台</span>
-          </el-menu-item>
-          <el-menu-item index="/student">
-            <i class="el-icon-setting"></i>
-            <span slot="title">学生管理</span>
-          </el-menu-item>
-        </el-submenu>
-      </el-menu>
+  <div class="parent">
+   <p class="title">Welcome to the IDEA lab!</p>
+    <el-button v-if="$user.id>=2" size="mini" @click="changeEditMod" style="color:#569696;justify-self: flex-end;" plain>{{isEditMod?'预览':'编辑'}}</el-button>
+    <el-divider class="title-divider"></el-divider> <!-- 横向分割线 -->
+    <div v-if="isEditMod&&$user.id>=2" class="welcome-text">
+      <quill-editor
+        v-model="editorContent"
+        ref="editor"
+        :options="editorOptions"
+      />
+      <div v-if="!isEditMod">
+        <div v-html="displayContent"></div>
+      </div>
+    </div>
 
-    </el-aside>
-    <el-container>
-      <el-header>
-        <div class="trigger" @click="isShow">
-          <!-- 点击展开收起导航和切换对应图标 -->
-          <i class="el-icon-s-fold" v-show="open"></i>
-          <i class="el-icon-s-unfold" v-show="close"></i>
-        </div>
-      </el-header>
-      <el-main>
-        <router-view></router-view>
-      </el-main>
-      <el-footer>Footer</el-footer>
-    </el-container>
-  </el-container>
+  </div>
+
 </template>
 
 <script>
 export default {
-  name: "index",
   data() {
     return {
-      openeds: ["1"],
-      isCollapse: false, //导航栏默认为展开
-      close: false, //第二个图标默认隐藏
-      open: true, //默认显示第一个图标
-    }
+      isEditMod:false,
+      editorContent: '', // 编辑器内容
+      displayContent: '', // 用于展示的内容
+      editorOptions: {
+        theme: 'snow',
+        placeholder: '在这里输入内容...',
+        modules: {
+          toolbar: [
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'script': 'sub' }, { 'script': 'super' }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            ['formula'], // 插入公式和表格（需要插件支持）
+            ['clean'], // 清除格式
+            [{ 'font': [] }],
+            [{ 'size': ['small', 'normal', 'large', 'huge'] }]
+          ],
+        },
+      },
+    };
   },
   methods: {
-    isShow() {
-      this.isCollapse = !this.isCollapse;
-      this.open = !this.open;
-      this.close = !this.close;
+    saveContent() {
+      const content = this.editorContent;
+      this.displayContent = this.editorContent;
+      console.log(this.displayContent)
+      fetch('http://localhost:3000/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('保存成功', data);
+        });
     },
-  }
-}
+    loadContent() {
+      fetch('http://localhost:3000/api/content/<id>')
+        .then((response) => response.json())
+        .then((data) => {
+          this.editorContent = data.content;
+          this.displayContent = data.content;
+        });
+    },
+  },
+};
 </script>
 
 <style scoped>
-.el-header, .el-footer {
-  background-color: #B3C0D1;
-  color: #333;
-  line-height: 60px;
-  height: 100%;
-  padding: 0 !important;
+.welcome-text {
+  margin: 20px;
+  width: 90%;
 }
-
-.el-aside {
-  background-color: #D3DCE6;
-  color: #333;
-  height: 100vh;
-}
-
-.el-main {
-  background-color: #E9EEF3;
-  color: #333;
-}
-
-body > .el-container {
-  margin-bottom: 40px;
-}
-
-.logo {
-  height: 60px;
-  line-height: 60px;
-  background-color: antiquewhite;
-  text-align: center;
-}
-
-.logo h3 {
-  margin: 0;
-  height: 60px;
-}
-
-.el-menu {
-  border-right-width: 0;
-}
-
-.el-menu-vertical:not(.el-menu--collapse) {
-  width: 240px;
-}
-
-.trigger {
-  height: 60px;
+.parent {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  width: 54px;
+  justify-content: center; /* 水平居中 */
+  width: 70%;
 }
-
-.trigger i {
+.title {
+  color: #345a5a;
+  font-weight: bold;
   font-size: 20px;
 }
-
-.trigger:hover {
-  background-color: rgb(203, 215, 230);
+.title-divider {
+  border-top: 2px solid black; /* 设置分割线的粗细和颜色 */
+  width: 150px; /* 设置分割线的宽度 */
+  margin: 10px auto;
 }
 </style>
+
 

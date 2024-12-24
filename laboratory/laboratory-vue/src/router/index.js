@@ -1,10 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
-import login from '@/views/login'
 import index from '@/views/index'
-import console from '@/views/console';
-import student from '@/views/student';
+import news from '@/views/news'
+import publications from '@/views/publications'
+import research from '@/views/research'
+import software from '@/views/software'
+import team from '@/views/team'
+import newsPage from '@/views/newsPage'
+import user from '@/views/user'
 
 Vue.use(Router)
 
@@ -12,30 +16,52 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld,
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: login
-    },
-    {
-      path: '/index',
       name: 'index',
       component: index,
-      children:[
-        {
-          path: '/console',
-          name: 'console',
-          component: console
-        },
-        {
-          path: '/student',
-          name: 'student',
-          component: student
-        }
-      ]
+    },
+    {
+      path: '/news',
+      name: 'news',
+      component: news,
+      meta:{canAdd:true}
+    },
+    {
+      path:'/newsPage/:newsId',
+      name: 'newsPage',
+      component: newsPage,
+    },
+    {
+      path: '/publications',
+      name: 'publications',
+      component: publications,
+      meta:{canAdd:true}
+    },
+    {
+      path: '/research',
+      name: 'research',
+      component: research,
+      meta:{canAdd:true}
+    },
+    {
+      path: '/software',
+      name: 'software',
+      component: software,
+      meta:{canAdd:true}
+    },
+    {
+      path: '/team',
+      name: 'team',
+      component: team,
+      meta:{canAdd:true}
+    },
+    {
+      path: '/user/:id',
+      name: 'user',
+      component: user,
+    },
+    {
+      path:'/user',
+      redirect: '/user/-1',
     }
   ]
 })

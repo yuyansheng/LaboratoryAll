@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.TeamMapper">
+    <insert id="insertTeam" parameterType="com.sdut.laboratorybackmodule.entity.Team">
+        INSERT INTO team (id, intro, email, teamLeaderId, name)
+        VALUES (#{id}, #{intro}, #{email}, #{teamLeaderId}, #{name})
+    </insert>
+
+    <update id="updateTeam" parameterType="com.sdut.laboratorybackmodule.entity.Team">
+        UPDATE team
+        SET intro = #{intro}, email = #{email}, teamLeaderId = #{teamLeaderId}, name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteTeamById" parameterType="java.lang.Long">
+        DELETE FROM team
+        WHERE id = #{id}
+    </delete>
+
+    <select id="findTeamById" resultType="com.sdut.laboratorybackmodule.entity.Team" parameterType="java.lang.Long">
+        SELECT id, intro, email, teamLeaderId, name
+        FROM team
+        WHERE id = #{id}
+    </select>
+
+    <select id="findAllTeams" resultType="com.sdut.laboratorybackmodule.entity.Team">
+        SELECT id, intro, email, teamLeaderId, name
+        FROM team
+    </select>
+
+    <select id="findAllMembersByTeamId" resultType="com.sdut.laboratorybackmodule.entity.Member">
+        SELECT *
+        FROM member m
+                 JOIN team_member tm ON m.id = tm.memberId
+        WHERE tm.teamId = #{teamId}
+    </select>
+
+</mapper>

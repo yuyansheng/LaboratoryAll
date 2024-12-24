@@ -1,113 +1,51 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div>
+    <el-menu
+      mode="horizontal"
+      background-color="#ffffff"
+      text-color="#333333"
+      active-text-color="#409EFF"
+      class="custom-menu"
+    >
+      <el-menu-item
+        v-for="(item, index) in menuItems"
+        :key="index"
+        :index="String(index)"
+      >
+        {{ item }}
+      </el-menu-item>
+    </el-menu>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  data () {
+  data() {
     return {
-      msg: 'Welcome to Your Vue.js App'
-    }
-  }
-}
+      menuItems: ["Home", "About", "Services", "Portfolio", "Contact"], // 动态导航内容
+    };
+  },
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
+<style>
+.custom-menu {
+  display: inline-flex; /* 让导航菜单宽度根据内容自适应 */
+  justify-content: center; /* 居中对齐 */
+  border: 1px solid #ccc; /* 外边框 */
+  border-radius: 5px; /* 圆角外边框 */
+  padding: 0; /* 移除菜单的默认内边距 */
+  width: auto; /* 让菜单的宽度根据内容动态调整 */
+  margin: 20px auto; /* 水平居中 */
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.custom-menu .el-menu-item {
+  padding: 0 20px; /* 每个菜单项的内边距 */
+  white-space: nowrap; /* 防止文字换行 */
+  text-align: center; /* 文本居中 */
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+.custom-menu .el-menu-item:hover {
+  background-color: #f0f0f0; /* 鼠标悬浮时的背景色 */
 }
 </style>

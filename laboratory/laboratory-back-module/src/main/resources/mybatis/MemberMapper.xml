@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.MemberMapper">
+
+    <resultMap id="memberResultMap" type="com.sdut.laboratorybackmodule.entity.Member">
+        <id column="id" property="id"/>
+        <result column="intro" property="intro"/>
+        <result column="imageUrl" property="imageUrl"/>
+        <result column="email" property="email"/>
+        <result column="role" property="role"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="contactWay" property="contactWay"/>
+    </resultMap>
+
+    <!-- 查询所有成员 -->
+    <select id="selectAllMembers" resultType="com.sdut.laboratorybackmodule.entity.Member">
+        SELECT * FROM member;
+    </select>
+
+    <select id="findByEmailAndPassword" resultType="com.sdut.laboratorybackmodule.entity.Member">
+        SELECT * FROM member WHERE email = #{email} AND password = #{password}
+    </select>
+
+    <select id="findById" parameterType="int" resultType="com.sdut.laboratorybackmodule.entity.Member">
+        SELECT * FROM member WHERE id = #{id}
+    </select>
+
+    <select id="getAllMembers" resultMap="memberResultMap">
+        SELECT * FROM members
+    </select>
+
+    <select id="getMemberById" parameterType="int" resultMap="memberResultMap">
+        SELECT * FROM members WHERE id = #{id}
+    </select>
+
+    <insert id="insertMember" parameterType="com.sdut.laboratorybackmodule.entity.Member">
+        INSERT INTO members(id, intro, imageUrl, email, role, password, name, contactWay)
+        VALUES(#{id}, #{intro}, #{imageUrl}, #{email}, #{role}, #{password}, #{name}, #{contactWay})
+    </insert>
+
+    <update id="updateMember" parameterType="com.sdut.laboratorybackmodule.entity.Member">
+        UPDATE members SET
+                           intro = #{intro},
+                           imageUrl = #{imageUrl},
+                           email = #{email},
+                           role = #{role},
+                           password = #{password},
+                           name = #{name},
+                           contactWay = #{contactWay}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMember" parameterType="int">
+        DELETE FROM members WHERE id = #{id}
+    </delete>
+</mapper>

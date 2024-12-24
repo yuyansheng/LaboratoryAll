@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.PublicationMapper">
+
+
+    <insert id="insertPublication" parameterType="com.sdut.laboratorybackmodule.entity.Publication">
+        INSERT INTO publication (intro, downloadUrl, author, name, releaseDate, periodicalName)
+        VALUES (#{intro}, #{downloadUrl}, #{author}, #{name}, #{releaseDate}, #{periodicalName})
+    </insert>
+
+    <!-- 根据ID查询出版物 -->
+    <select id="getPublicationById" resultType="com.sdut.laboratorybackmodule.entity.Publication">
+        SELECT * FROM publication WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有出版物 -->
+    <select id="getAllPublications" resultType="com.sdut.laboratorybackmodule.entity.Publication">
+        SELECT * FROM publication
+    </select>
+
+    <!-- 更新出版物 -->
+    <update id="updatePublication" parameterType="com.sdut.laboratorybackmodule.entity.Publication">
+        UPDATE publication
+        SET intro = #{intro},
+            downloadUrl = #{downloadUrl},
+            author = #{author},
+            name = #{name},
+            releaseDate = #{releaseDate},
+            periodicalName = #{periodicalName}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除出版物 -->
+    <delete id="deletePublication" parameterType="long">
+        DELETE FROM publication WHERE id = #{id}
+    </delete>
+</mapper>

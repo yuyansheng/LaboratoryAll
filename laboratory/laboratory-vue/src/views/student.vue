@@ -1,7 +1,3 @@
-<script setup>
-
-</script>
-
 <template>
   <el-card class="box-card">
     <!-- Dialog 对话框 弹出新增和修改表单 -->
@@ -34,7 +30,14 @@
         </div>
       </el-dialog>
     </el-row>
-
+    <div v-for="(item, index) in tableData" :key="item.id">
+      <p>Index: {{ index }}</p>
+      <p>ID: {{ item.id }}</p>
+      <p>姓名: {{ item.name }}</p>
+      <p>年龄: {{ item.age }}</p>
+      <p>性别: {{ item.gender }}</p>
+      <p>邮箱: {{ item.email }}</p>
+    </div>
     <!-- 表格 -->
     <el-table
       ref="singleTable"
@@ -157,15 +160,11 @@ export default {
     getList() {
       this.$axios({
         method: 'get',
-        url: 'http://localhost:9090/student/info',
+        url: this.baseURL + '/student/info',
+      }).then((response) => {
+        this.tableData = JSON.parse(JSON.stringify(response.data));
+      }).catch((error) => {
       })
-        .then((response) => {
-          console.log('请求成功:', response);  // 打印响应
-          this.tableData = response.data;
-        })
-        .catch((error) => {
-          console.error('请求失败:', error);  // 打印错误信息
-        });
     },
 
     //提交按钮

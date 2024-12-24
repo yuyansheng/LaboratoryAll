@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.NewsMapper">
+    <resultMap id="newsResultMap" type="com.sdut.laboratorybackmodule.entity.News">
+        <id property="id" column="id"/>
+        <result property="updateTime" column="updateTime"/>
+        <result property="image" column="image"/>
+        <result property="title" column="title"/>
+        <result property="releaseTime" column="releaseTime"/>
+        <result property="content" column="content"/>
+        <result property="authorId" column="authorTd"/>
+        <result property="intro" column="intro"/>
+        <result property="readTimes" column="readTimes"/>
+        <result property="delete" column="isDelete"/>
+    </resultMap>
+
+    <select id="getNewsById" resultMap="newsResultMap">
+        SELECT * FROM news WHERE id = #{id}
+    </select>
+
+    <select id="getAllNews" resultMap="newsResultMap">
+        SELECT * FROM news
+    </select>
+
+    <select id="getNewsByAuthorId" resultMap="newsResultMap">
+        SELECT * FROM news WHERE authorId = #{authorId}
+    </select>
+
+    <insert id="insertNews" parameterType="com.sdut.laboratorybackmodule.entity.News">
+        INSERT INTO news (updateTime, image, title, releaseTime, content, authorId, intro, readTimes, isDelete)
+        VALUES (#{updateTime}, #{image}, #{title}, #{releaseTime}, #{content}, #{authorId}, #{intro}, #{readTimes}, #{isDelete})
+    </insert>
+
+    <update id="updateNews" parameterType="com.sdut.laboratorybackmodule.entity.News">
+        UPDATE news SET
+                        updateTime = #{updateTime}, image = #{image}, title = #{title}, releaseTime = #{releaseTime},
+                        content = #{content}, authorId = #{authorId}, intro = #{intro}, readTimes = #{readTimes}, isDelete = #{isDelete}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteNews">
+        DELETE FROM news WHERE id = #{id}
+    </delete>
+
+    <select id="getPagedNews" resultMap="newsResultMap">
+        SELECT * FROM news
+        WHERE isDelete = false
+        ORDER BY releaseTime DESC
+            LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdut.laboratorybackmodule.mapper.SoftwareMapper">
+
+    <resultMap id="SoftwareResultMap" type="com.sdut.laboratorybackmodule.entity.Software">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="intro" column="intro" />
+        <result property="downloadUrl" column="downloadUrl" />
+        <result property="documentUrl" column="documentUrl" />
+    </resultMap>
+
+    <insert id="insertSoftware" parameterType="com.sdut.laboratorybackmodule.entity.Software">
+        INSERT INTO software (name, intro, downloadUrl, documentUrl)
+        VALUES (#{name}, #{intro}, #{downloadUrl}, #{documentUrl})
+    </insert>
+
+    <select id="getSoftwareById" resultMap="SoftwareResultMap">
+        SELECT * FROM software WHERE id = #{id}
+    </select>
+
+    <select id="getAllSoftware" resultMap="SoftwareResultMap">
+        SELECT * FROM software
+    </select>
+
+    <update id="updateSoftware" parameterType="com.sdut.laboratorybackmodule.entity.Software">
+        UPDATE software SET
+                            name = #{name},
+                            intro = #{intro},
+                            downloadUrl = #{downloadUrl},
+                            documentUrl = #{documentUrl}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteSoftware" parameterType="java.lang.Long">
+        DELETE FROM software WHERE id = #{id}
+    </delete>
+
+</mapper>
