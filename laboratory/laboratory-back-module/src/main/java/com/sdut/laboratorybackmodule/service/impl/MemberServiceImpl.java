@@ -24,6 +24,11 @@ public class MemberServiceImpl implements IMemberService {
     }
 
     @Override
+    public List<Member> searchMembersByName(String name) {
+        return memberMapper.findMembersByName(name);
+    }
+
+    @Override
     public List<Member> getAllMembers() {
         return memberMapper.getAllMembers();
     }

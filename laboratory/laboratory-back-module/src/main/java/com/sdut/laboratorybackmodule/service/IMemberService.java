@@ -9,6 +9,8 @@ public interface IMemberService {
 
     Member login(String email, String password);
 
+    List<Member> searchMembersByName(String name);
+
     List<Member> getAllMembers();
 
     Member getMemberById(int id);

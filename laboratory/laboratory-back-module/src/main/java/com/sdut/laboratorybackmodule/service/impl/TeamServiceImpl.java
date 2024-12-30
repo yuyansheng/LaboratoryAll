@@ -1,5 +1,6 @@
 package com.sdut.laboratorybackmodule.service.impl;
 
+import com.sdut.laboratorybackmodule.entity.Member;
 import com.sdut.laboratorybackmodule.entity.Team;
 import com.sdut.laboratorybackmodule.mapper.TeamMapper;
 import com.sdut.laboratorybackmodule.service.ITeamService;
@@ -14,8 +15,9 @@ public class TeamServiceImpl implements ITeamService {
     @Autowired
     private TeamMapper teamMapper;
 
-    public void saveTeam(Team team) {
+    public Long saveTeam(Team team) {
         teamMapper.insertTeam(team);
+        return team.getId();
     }
 
     public void updateTeam(Team team) {
@@ -32,5 +34,10 @@ public class TeamServiceImpl implements ITeamService {
 
     public List<Team> findAllTeams() {
         return teamMapper.findAllTeams();
+    }
+
+    @Override
+    public List<Member> findAllMembersByTeamId(Long id) {
+        return teamMapper.findAllMembersByTeamId(id);
     }
 }

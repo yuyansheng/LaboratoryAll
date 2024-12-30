@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/software")
+@RequestMapping("/software")
 @CrossOrigin(origins = "*")
 public class SoftwareController {
 
@@ -20,7 +20,7 @@ public class SoftwareController {
         softwareService.addSoftware(software);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("getById/{id}")
     public Software getSoftwareById(@PathVariable Long id) {
         return softwareService.getSoftwareById(id);
     }

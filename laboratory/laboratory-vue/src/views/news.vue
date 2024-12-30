@@ -50,6 +50,17 @@ export default {
       })
     },
     updateViews(index){
+      const today = new Date().toISOString().split('T')[0];
+      // 从 localStorage 获取最后一次触发日期
+      const lastTriggeredDate = localStorage.getItem('lastLookTime');
+
+      // 如果当天已经触发过，则不允许再次触发
+      if (lastTriggeredDate === today) {
+        return;
+      }
+      // 更新 localStorage 中的触发日期为今天
+      localStorage.setItem('lastLookTime', today);
+
       this.news[index].readTimes += 1
       axios.put(this.$baseURL+'/news/update',this.news[index])
         .then(response => {

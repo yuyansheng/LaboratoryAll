@@ -16,6 +16,8 @@ public interface MemberMapper {
 
     List<Member> getAllMembers();
 
+    List<Member> findMembersByName(String name);
+
     Member getMemberById(int id);
 
     void insertMember(Member member);

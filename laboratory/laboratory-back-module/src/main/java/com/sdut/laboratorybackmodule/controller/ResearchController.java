@@ -35,7 +35,7 @@ public class ResearchController {
         researchService.updateResearch(research);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("、delete/{id}")
     public void deleteResearch(@PathVariable Long id) {
         researchService.deleteResearch(id);
     }

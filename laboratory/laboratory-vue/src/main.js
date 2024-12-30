@@ -19,17 +19,11 @@ Vue.prototype.$axios = axios
 Vue.prototype.$quill = Quill;
 Vue.prototype.$baseURL = 'http://localhost:9090'
 /* eslint-disable no-new */
-let user = {
-  id:-1,
-  intro:"safsasdfsdasdfasdfasdf  saf s asf dsf dsaf sdf asd sdf asdf asd sdf asf sdf dfadfasafs",
-  imageUrl:"",
-  email:"",
-  role:0,
-  password:"",
-  name:"yuyansheng",
-  contactWay:"13123123",
-}
-Vue.prototype.$user = user;
+let loginUser = Vue.observable({
+  user:{},
+})
+Vue.prototype.$loginUser = loginUser
+
 new Vue({
   el: '#app',
   router,

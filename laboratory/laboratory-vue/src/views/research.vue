@@ -1,4 +1,6 @@
 <script>
+import axios from "axios";
+
 export default {
   data(){
     return {
@@ -8,10 +10,28 @@ export default {
           intro:"safhlfhlwiebfdsjfnfjjasfdafdfadfasdfasadfsd fasdf asdf asd a s dfsafdsfaf sancie",
           name:"lean;fdlskcnsef",
           url:"https://chat3.eqing.tech/#/chat",
-          beginTime:Date.now()
+          beginTimes:Date.now()
         }
       ]
     }
+  },
+
+  methods:{
+    loadAllResearch() {
+      axios
+        .get(this.$baseURL + '/research/all')
+        .then((response) => {
+          this.researches = response.data;
+          console.log(this.researches);
+        })
+        .catch((error) => {
+          console.error('请求数据失败', error);
+        });
+    },
+  },
+
+  mounted() {
+    this.loadAllResearch()
   }
 }
 </script>
@@ -27,7 +47,7 @@ export default {
         <div class="intro-dot"></div>
         <div class="intro">{{item.intro}}</div>
       </div>
-      <div class="begin-time">{{item.beginTime}}</div>
+      <div class="begin-time">{{item.beginTimes}}</div>
     </div>
   </div>
 </template>

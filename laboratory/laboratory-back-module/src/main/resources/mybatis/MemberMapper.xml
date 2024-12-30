@@ -15,6 +15,11 @@
         <result column="contactWay" property="contactWay"/>
     </resultMap>
 
+    <resultMap id="memberNameAndIDResultMap" type="com.sdut.laboratorybackmodule.entity.Member">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
     <!-- 查询所有成员 -->
     <select id="selectAllMembers" resultType="com.sdut.laboratorybackmodule.entity.Member">
         SELECT * FROM member;
@@ -29,20 +34,20 @@
     </select>
 
     <select id="getAllMembers" resultMap="memberResultMap">
-        SELECT * FROM members
+        SELECT * FROM member
     </select>
 
     <select id="getMemberById" parameterType="int" resultMap="memberResultMap">
-        SELECT * FROM members WHERE id = #{id}
+        SELECT * FROM member WHERE id = #{id}
     </select>
 
-    <insert id="insertMember" parameterType="com.sdut.laboratorybackmodule.entity.Member">
-        INSERT INTO members(id, intro, imageUrl, email, role, password, name, contactWay)
+    <insert id="insertMember" useGeneratedKeys="true" keyProperty="id" parameterType="com.sdut.laboratorybackmodule.entity.Member">
+        INSERT INTO member(id, intro, imageUrl, email, role, password, name, contactWay)
         VALUES(#{id}, #{intro}, #{imageUrl}, #{email}, #{role}, #{password}, #{name}, #{contactWay})
     </insert>
 
     <update id="updateMember" parameterType="com.sdut.laboratorybackmodule.entity.Member">
-        UPDATE members SET
+        UPDATE member SET
                            intro = #{intro},
                            imageUrl = #{imageUrl},
                            email = #{email},
@@ -54,6 +59,12 @@
     </update>
 
     <delete id="deleteMember" parameterType="int">
-        DELETE FROM members WHERE id = #{id}
+        DELETE FROM member WHERE id = #{id}
     </delete>
+
+    <select id="findMembersByName" resultMap="memberNameAndIDResultMap">
+        SELECT *
+        FROM member
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
 </mapper>

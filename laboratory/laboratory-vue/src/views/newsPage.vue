@@ -1,13 +1,34 @@
 <script >
 import axios from "axios";
-import {nextTick} from "vue";
+import authority from "../utils/authority";
+
 
 export default {
+  computed: {
+    authority() {
+      return authority
+    },
+    getImageURL(){
+      return this.tempImageURL;
+    }
+  },
+  props:{
+    isAddMode:{
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
+
   data() {
     return {
-      data:{
-        fileType:''
+      tempImageURL:"",
+      pageMode:"preview", // preview 预览， addNews添加新新闻
+      newsUploadData:{
+        fileType:"NEWS_IMAGE"
       },
+      tempNews:{},
+      isEditMod:false,
       toolbar: [
         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
         ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
@@ -23,19 +44,16 @@ export default {
         [{ 'size': ['small', 'normal', 'large', 'huge'] }]
       ],
       news:{
-        id:1,
-        image:require('@/assets/text.png'),
-        title:"sdflsakfjasdf",
+        image:"",
+        title:"",
         releaseTime:Date.now(),
-        content:"fsfdfadfadsfafewfsdfwsefse sf",
+        content:"",
         authorId:"",
         updateTime:Date.now(),
-        intro:"fasdfdsfadf fasf sfasdf as sf asf safdaegesf sfa sf asf s saf sdf a saf sdaf  sadf sdf sadf sa fs af a adsf ads as ssd as  afd as",
-        read_times:123,
-        is_delete:false,},
-      tempNews:{},
-      tempContent:"",
-      isEditMod:true
+        intro:"",
+        readTimes:0,
+        isDelete:false,
+      },
     };
   },
   methods: {
@@ -43,30 +61,28 @@ export default {
       let date = new Date(timestamp)
       return date.toLocaleDateString()
     },
-    uploadData(){
-      return this.data
-    },
     getUploadUrl() {
       // 可以在这里动态生成上传地址，可以基于当前环境、用户权限等条件生成
       return this.$baseURL+'/file/upload';
     },
     handleSuccess(response, file, fileList) {
-      // 后端返回的文件URL
       console.log('文件上传成功，URL为：', response);
-      // 可以在这里将URL保存起来或者展示给用户
+      this.tempNews.image = response;  // 假设 response 包含图片的文件名或路径
+      this.loadNewsImage();  // 直接调用loadNewsImage并更新tempImageURL
     },
     beforeUpload(file) {
       // 可以在这里添加文件上传前的处理，如文件大小、格式的检查
 
-      // 传输文件类型枚举
-       // 这里假设是图片类型
-      this.data.fileType = "NEWS_IMAGE"
-      // 返回 true 表示继续上传，false 表示取消上传
       return true;
     },
     changeEditMod(){
       this.isEditMod = !this.isEditMod
+      console.log(this.tempImageURL)
+      if(this.tempImageURL===""&&this.isEditMod){
+        this.loadNewsImage()
+      }
     },
+
     loadNewsPage(newsId) {
       axios.get(this.$baseURL+`/news/getNews/${newsId}`)
         .then((response)=>{
@@ -77,11 +93,45 @@ export default {
         console.error('请求数据失败',error)
       })
     },
+    async loadNewsImage() {
+      try {
+        const response = await axios.get(this.$baseURL+'/file/load', {
+          params: {
+            fileName: this.tempNews.image,
+            fileType: "NEWS_IMAGE"
+          },
+          responseType: 'arraybuffer',  // 返回二进制数据
+        });
+
+        const contentType = response.headers['content-type'];
+        const base64Image = this.arrayBufferToBase64(response.data);
+        this.tempImageURL = `data:${contentType};base64,${base64Image}`; // 更新 tempImageURL
+      } catch (e) {
+        console.error("文件加载失败", e);
+        this.tempImageURL = ""; // 加载失败时清空 tempImageURL
+      }
+    },
+    arrayBufferToBase64(buffer) {
+      const byteArray = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < byteArray.length; i++) {
+        binary += String.fromCharCode(byteArray[i]);
+      }
+      return window.btoa(binary); // 转换为 Base64
+    }
+  },
+
+  created() {
+    console.log("asdfsdfasdfasdfasfsadf")
   },
   mounted(){
-    this.loadNewsPage(this.$route.params.newsId)
-    console.log(this.news.id);
-    this.tempContent = this.news.content;
+    if(!this.$route.params.hasOwnProperty('newsId')){
+      this.pageMode='addNews'
+      this.isEditMod = true
+    } else {
+      this.loadNewsPage(this.$route.params.newsId)
+    }
+    this.tempNews = this.news
   }
 }
 </script>
@@ -94,7 +144,7 @@ export default {
       </div>
       <div class="text">name</div>
       <div class="text">{{timestampToDate(this.news.releaseTime)}}</div>
-      <el-button size="mini" @click="changeEditMod" style="color:#569696;justify-self: flex-end;" plain>{{isEditMod?'预览':'编辑'}}</el-button>
+      <el-button v-if="authority.canUse(this.$loginUser.user,1)" size="mini" @click="changeEditMod" style="color:#569696;justify-self: flex-end;" plain>{{isEditMod?'预览':'编辑'}}</el-button>
     </div>
       <div v-if="!isEditMod">
         <div  class="title">{{this.tempNews.title}}</div>
@@ -118,10 +168,10 @@ export default {
               class="upload-demo"
               :action="getUploadUrl()"
               :show-file-list="false"
-              :data="data"
+              :data="newsUploadData"
               :on-success="handleSuccess"
               :before-upload="beforeUpload">
-              <img v-if="tempNews.image" :src="tempNews.image" class="news-image">
+              <img v-if="tempImageURL" :src="tempImageURL" class="news-image" />
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>

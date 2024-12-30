@@ -11,7 +11,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, intro, url, begin_times, name
+        id, intro, url, beginTimes, name
     </sql>
 
     <insert id="insertResearch" parameterType="com.sdut.laboratorybackmodule.entity.Research" >

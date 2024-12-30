@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/member")
@@ -22,9 +23,7 @@ public class MemberController {
     public ResponseEntity<?> loginMember(@RequestBody MemberLoginRequest request) {
         String email = request.getEmail();
         String password = request.getPassword();
-        System.out.println(request.getEmail() +" "+request.getPassword() +"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Member member = memberService.login(email, password);
-        System.out.println(member);
         if (member == null) {
             // 如果成员为空，返回适当的响应
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败，邮箱或密码错误");
@@ -33,18 +32,29 @@ public class MemberController {
             return ResponseEntity.ok(member);
         }
     }
-    @GetMapping
+
+    @GetMapping("/searchMembersByName")
+    public List<MemberDTO> searchMembersByName(@RequestParam("name") String name) {
+        System.out.println(name+"ASDSDASDSADASDSADDS");
+        List<Member> members = memberService.searchMembersByName(name);
+        return members.stream()
+                .map(member -> new MemberDTO(member.getId(), member.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/all")
     public List<Member> getAllMembers() {
         return memberService.getAllMembers();
     }
 
-    @GetMapping("getmemberbyid/{id}")
+    @GetMapping("/getMemberById/{id}")
     public Member getMemberById(@PathVariable int id) {
         return memberService.getMemberById(id);
     }
 
-    @PostMapping("/add")
+    @PutMapping("/add")
     public void addMember(@RequestBody Member member) {
+        System.out.println(member);
         memberService.insertMember(member);
     }
 
@@ -71,5 +81,15 @@ public class MemberController {
         }
     }
 
+    @Getter @Setter
+    public static class MemberDTO {
+        private Integer id;
+        private String name;
+        // 构造函数
+        public MemberDTO(Integer id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
 
 }

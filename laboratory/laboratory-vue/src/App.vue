@@ -1,12 +1,20 @@
 <template>
   <div id="app" class="parent">
+<!--    用户弹窗-->
     <el-drawer
-      :title="$user.id===-1?'login':'user'"
+      :title="this.isLogin?'login':'user page'"
       :visible.sync="drawer"
       size="30%">
-      <user :user-id="userId"/>
+      <user v-if="drawer" :user-id="userId" :user-page-mode="isLogin?'login':'selfUserPage'"/>
     </el-drawer>
-
+<!--    添加或者编辑的表单-->
+    <add-and-edit-dialog
+      v-if="showAddAndEdit"
+      :showAddAndEdit.sync="showAddAndEdit"
+      :formType="formType"
+      @update:showAddAndEdit="showAddAndEdit = $event"
+    />
+<!--    导航栏-->
     <div class="right-alignment">
       <div class="school-text">
         <p>Shandong University of Technology</p>
@@ -35,41 +43,100 @@
     <div style="display: flex; align-items: center;flex-direction: column;width: 100%;background-color: cornsilk ">
       <router-view/>
     </div>
+<!--    添加按钮 需要在index里面-->
+    <el-button
+      v-if="shouldShowAddButton"
+      class="add-button"
+      type="primary"
+      icon="el-icon-plus"
+      @click="openAddAndEdit"
+    />
+    <div class="footer">
+      <!-- 页脚区域 -->
+      <p>这里是页脚，保持一定的底部留白</p>
+    </div>
   </div>
 </template>
 
 <script>
 import user from "./views/user.vue";
+import authority from "./utils/authority";
+import addAndEdit from "./views/addAndEditDialog.vue";
+import AddAndEditDialog from "./views/addAndEditDialog.vue";
 
 export default {
-  components: {user},
+  components: {
+    AddAndEditDialog,
+    user,
+    addAndEdit,
+  },
   data() {
     return {
-      userId:0,
+      showAddAndEdit:false,
+      userId:-1,
+      formType:'',
       drawer:false,
       menuItems: ["Welcome!", "News", "Research", "Team", "Publications","Software","Resources",
         "Contact"], // 导航菜单项
-      pageURLs:["/","/news","/research","/team","/publications","/software","resources","/contact"],//对应页面跳转url
+      pageURLs:["/","/news","/research","/team","/publications","/software","/resources","/contact"],//对应页面跳转url
     };
   },
+  computed: {
+    shouldShowAddButton(){
+      // if(!authority.canUse(this.$loginUser.user,1)){
+      //   return false;
+      // }
+      if(this.$route.meta.hasOwnProperty('canAdd')){
+        return this.$route.meta.canAdd
+      }
+      else return false;
+    },
+
+    isLogin() {
+      console.log(this.$loginUser.user)
+      return authority.isLogin(this.$loginUser.user);
+    },
+  },
   methods:{
+    openAddAndEdit() {
+      console.log(this.$route.meta)
+      if(!this.$route.meta.hasOwnProperty('formType')){
+        return;
+      }
+      this.formType =  this.$route.meta.formType;
+      this.showAddAndEdit = true
+    },
     pageTurns(index){
       console.log(index)
       this.$router.push(this.pageURLs[index])
     },
     openSelfUser(){
-      this.userId=this.$user.id
       this.drawer = true
     }
   }
 };
 </script>
-<style>
-body {
-  color: #569696;
-}
-</style>
 <style scoped>
+.footer {
+  background-color: #f1f1f1;
+  padding: 20px;
+  text-align: center;
+  margin-top: auto;  /* 保证页脚始终位于页面底部 */
+}
+.add-button {
+  background-color: #569696;
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  font-size:40px;
+  width: 60px; /* 按钮宽度 */
+  height: 60px; /* 按钮高度 */
+  border-radius: 50%; /* 圆形 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
 .school-text {
   display: flex;
   flex-direction: column; /* 垂直排列子项 */
@@ -87,7 +154,8 @@ body {
 
 .parent {
   display: flex;
-  flex-direction: column;   /* 使用垂直布局，确保菜单和内容在竖直方向上顺序排列 */
+  flex-direction: column;
+  min-height: 90vh;
   align-items: center;      /* 水平居中 */
   justify-content: flex-start; /* 向上对齐 */
   width: 100%;

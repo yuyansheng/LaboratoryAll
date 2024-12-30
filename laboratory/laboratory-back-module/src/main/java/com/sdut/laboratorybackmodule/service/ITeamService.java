@@ -1,12 +1,13 @@
 package com.sdut.laboratorybackmodule.service;
 
+import com.sdut.laboratorybackmodule.entity.Member;
 import com.sdut.laboratorybackmodule.entity.Team;
 
 import java.util.List;
 
 public interface ITeamService {
 
-    public void saveTeam(Team team);
+    public Long saveTeam(Team team);
 
     public void updateTeam(Team team);
 
@@ -14,5 +15,7 @@ public interface ITeamService {
 
     public Team findTeamById(Long id) ;
 
-    public List<Team> findAllTeams() ;
+    List<Team> findAllTeams() ;
+
+    List<Member> findAllMembersByTeamId(Long id);
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/publications")
+@RequestMapping("/publication")
 @CrossOrigin(origins = "*")
 public class PublicationController {
 
@@ -16,19 +16,19 @@ public class PublicationController {
     IPublicationService publicationService;
 
     // 插入新出版物
-    @PostMapping("/insert")
+    @PostMapping("/add")
     public void createPublication(@RequestBody Publication publication) {
         publicationService.insertPublication(publication);
     }
 
     // 获取所有出版物
-    @GetMapping("/getall")
+    @GetMapping("/all")
     public List<Publication> getAllPublications() {
         return publicationService.getAllPublications();
     }
 
     // 根据ID获取出版物
-    @GetMapping("/getbyid/{id}")
+    @GetMapping("/getById/{id}")
     public Publication getPublicationById(@PathVariable Long id) {
         return publicationService.getPublicationById(id);
     }
