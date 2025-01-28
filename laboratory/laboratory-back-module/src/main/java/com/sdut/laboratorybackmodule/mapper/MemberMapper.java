@@ -2,6 +2,7 @@ package com.sdut.laboratorybackmodule.mapper;
 
 import com.sdut.laboratorybackmodule.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,5 +25,6 @@ public interface MemberMapper {
 
     void updateMember(Member member);
 
+    @Transactional
     void deleteMember(int id);
 }

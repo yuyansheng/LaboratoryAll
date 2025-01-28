@@ -1,5 +1,7 @@
 <script>
 import axios from "axios";
+import process from "shelljs";
+import {API_PATH} from "../config";
 
 export default {
   data() {
@@ -33,36 +35,70 @@ export default {
     };
   },
   methods: {
+    handlePageChange(pageNum){
+      this.pageNum=pageNum
+      console.log(this.pageNum+" "+this.pageSize)
+      this.loadNews()
+    },
+    API_PATH() {
+      return API_PATH
+    },
     loadNews() {
-      axios.get(this.$baseURL+'/news/paged',
+      console.log("!!!!"+process.env.VUE_APP_API_PATH)
+      axios.get(API_PATH+'/laboratory/news/list',
         {
           params:{
             pageSize:this.pageSize,
             pageNum:this.pageNum,
+            releaseTime:new Date().toISOString().split('T')[0],
+            orderByColumn:'releasetime',
+            isDelete:'0',
+            isAsc:'descending'
           },
         })
         .then((response)=>{
-          this.news=response.data.data;
-          this.totalNewsCount=response.data.totalNewsCount
+          this.news=response.data.rows;
+          console.log(response)
+          this.totalNewsCount=response.data.total
+          this.news.forEach(news=>{
+            axios.get(API_PATH+'/laboratory/member/'+news.authorId).then((response)=>{
+              this.$set(news,'member',response.data.data)
+              console.log(response.data)
+            })
+          })
+          this.totalNewsCount=response.data.total
           console.log(this.news)
         }).catch((error)=>{
           console.error('请求数据失败',error)
       })
     },
     updateViews(index){
-      const today = new Date().toISOString().split('T')[0];
-      // 从 localStorage 获取最后一次触发日期
-      const lastTriggeredDate = localStorage.getItem('lastLookTime');
+      const today = new Date().toISOString().split('T')[0]; // 获取今天的日期
+      const currentNewsId = this.news[index].id;
 
-      // 如果当天已经触发过，则不允许再次触发
-      if (lastTriggeredDate === today) {
+// 从 localStorage 获取该新闻的最后触发时间
+      const lastTriggeredTime = JSON.parse(localStorage.getItem('lastTriggeredTime')) || {};
+
+// 获取当前新闻的最后触发时间
+      const lastTriggerDate = lastTriggeredTime[currentNewsId];
+      console.log(lastTriggerDate)
+// 如果新闻的最后触发日期与今天相同，则不允许再次触发
+      if (lastTriggerDate === today) {
         return;
       }
-      // 更新 localStorage 中的触发日期为今天
-      localStorage.setItem('lastLookTime', today);
 
-      this.news[index].readTimes += 1
-      axios.put(this.$baseURL+'/news/update',this.news[index])
+// 更新 localStorage 中该新闻的最后触发时间为今天
+      lastTriggeredTime[currentNewsId] = today;
+      localStorage.setItem('lastTriggeredTime', JSON.stringify(lastTriggeredTime));
+
+// 更新新闻的阅读次数
+      this.news[index].readTimes =  (parseInt(this.news[index].readTimes) || 0) + 1;
+      axios.put(API_PATH + '/laboratory/news/update/views',null, {
+        params:{
+          views: this.news[index].readTimes,
+          newsId: this.news[index].id
+        }
+      })
         .then(response => {
           console.log('Update successful', response);
         })
@@ -74,30 +110,27 @@ export default {
       this.updateViews(index)
       this.$router.push({name:'newsPage',params:{newsId:newsId}})
     },
-    timestampToDate(timestamp){
-      let date = new Date(timestamp)
-      return date.toLocaleDateString()
-    }
   },
   mounted() {
     this.loadNews();
-  }
+  },
+
 };
 </script>
 
 <template>
   <div class="parent">
     <div v-for="(item,index) in news" :key="index" class="news-parent" @click="handleClick(index,item.id)">
-      <img class="news-image" :src="item.image" alt="news-image">
+      <img class="news-image" :src="API_PATH() + item.image" alt="news-image">
       <div class="news-data">
 
-        <div class="avatar-username">
+        <div class="avatar-username" v-if="item.hasOwnProperty('member')">
           <div>
-            <el-avatar :size="30" src="@/assets/text.png"></el-avatar>
+            <el-avatar :size="30" :src="API_PATH()+item.member.image"></el-avatar>
           </div>
           <div class="user-date-text">
-            <div>name</div>
-            <div>{{timestampToDate(item.releaseTime)}}</div>
+            <div>{{item.member.name}}</div>
+            <div>{{(new Date(item.releaseTime)).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) }}</div>
           </div>
         </div>
 
@@ -120,9 +153,10 @@ export default {
     <div class="left-alignment">
       <el-pagination
         layout="prev, pager, next"
+        @current-change="handlePageChange"
         :page-size="this.pageSize"
         :current-page="this.pageNum"
-        :total="news.length">
+        :total="totalNewsCount">
       </el-pagination>
     </div>
   </div>
@@ -167,8 +201,10 @@ export default {
 
 .parent {
   margin-top: 20px;
-  width: 70%;
-
+  width: 70%; /* 设置宽度为100% */
+  display: flex;
+  justify-content: center; /* 居中所有新闻项 */
+  flex-wrap: wrap; /* 允许换行 */
 }
 .news-image{
   width: 50%;

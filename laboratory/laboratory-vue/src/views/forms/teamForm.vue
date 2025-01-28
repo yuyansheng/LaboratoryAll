@@ -136,13 +136,13 @@ export  default {
           :remote-method="handleSearch"
           :loading="loading"
         >
-        <!-- 下拉框选项 -->
-        <el-option
-          v-for="(item) in members"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"
-        />
+          <!-- 下拉框选项 -->
+          <el-option
+            v-for="(item) in members"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
         </el-select>
       </el-form-item>
 

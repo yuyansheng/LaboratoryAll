@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.laboratory.mapper.PublicationMapper">
+
+    <resultMap type="Publication" id="PublicationResult">
+        <result property="id"    column="id"    />
+        <result property="intro"    column="intro"    />
+        <result property="downloadUrl"    column="downloadUrl"    />
+        <result property="author"    column="author"    />
+        <result property="name"    column="name"    />
+        <result property="releaseDate"    column="releaseDate"    />
+        <result property="periodicalName"    column="periodicalName"    />
+    </resultMap>
+
+    <sql id="selectPublicationVo">
+        select id, intro, downloadUrl, author, name, releaseDate, periodicalName from publication
+    </sql>
+
+    <select id="selectPublicationList" parameterType="Publication" resultMap="PublicationResult">
+        <include refid="selectPublicationVo"/>
+        <where>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="downloadUrl != null  and downloadUrl != ''"> and downloadUrl = #{downloadUrl}</if>
+            <if test="author != null  and author != ''"> and author = #{author}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="releaseDate != null "> and releaseDate = #{releaseDate}</if>
+            <if test="periodicalName != null  and periodicalName != ''"> and periodicalName like concat('%', #{periodicalName}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectPublicationById" parameterType="String" resultMap="PublicationResult">
+        <include refid="selectPublicationVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertPublication" parameterType="Publication" useGeneratedKeys="true" keyProperty="id">
+        insert into publication
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="intro != null">intro,</if>
+            <if test="downloadUrl != null">downloadUrl,</if>
+            <if test="author != null">author,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="releaseDate != null">releaseDate,</if>
+            <if test="periodicalName != null">periodicalName,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="intro != null">#{intro},</if>
+            <if test="downloadUrl != null">#{downloadUrl},</if>
+            <if test="author != null">#{author},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="releaseDate != null">#{releaseDate},</if>
+            <if test="periodicalName != null">#{periodicalName},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePublication" parameterType="Publication">
+        update publication
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="downloadUrl != null">downloadUrl = #{downloadUrl},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="releaseDate != null">releaseDate = #{releaseDate},</if>
+            <if test="periodicalName != null">periodicalName = #{periodicalName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePublicationById" parameterType="String">
+        delete from publication where id = #{id}
+    </delete>
+
+    <delete id="deletePublicationByIds" parameterType="String">
+        delete from publication where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

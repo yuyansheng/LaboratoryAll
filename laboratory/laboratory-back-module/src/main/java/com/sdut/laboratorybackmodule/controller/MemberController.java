@@ -58,9 +58,8 @@ public class MemberController {
         memberService.insertMember(member);
     }
 
-    @PutMapping("/update/{id}")
-    public void updateMember(@PathVariable int id, @RequestBody Member member) {
-        member.setId(id);
+    @PutMapping("/update}")
+    public void updateMember( @RequestBody Member member) {
         memberService.updateMember(member);
     }
 

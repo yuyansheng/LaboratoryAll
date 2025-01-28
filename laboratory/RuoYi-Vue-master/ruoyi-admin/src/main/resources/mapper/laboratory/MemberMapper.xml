@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.laboratory.mapper.MemberMapper">
+
+    <resultMap type="Member" id="MemberResult">
+        <result property="id"    column="id"    />
+        <result property="intro"    column="intro"    />
+        <result property="image"    column="image"    />
+        <result property="email"    column="email"    />
+        <result property="role"    column="role"    />
+        <result property="password"    column="password"    />
+        <result property="name"    column="name"    />
+        <result property="contactWay"    column="contactWay"    />
+    </resultMap>
+
+    <sql id="selectMemberVo">
+        select id, intro, image, email, role, password, name, contactWay from member
+    </sql>
+
+    <select id="selectMemberList" parameterType="Member" resultMap="MemberResult">
+        <include refid="selectMemberVo"/>
+        <where>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="image != null  and image != ''"> and image = #{image}</if>
+            <if test="email != null  and email != ''"> and email = #{email}</if>
+            <if test="role != null  and role != ''"> and role = #{role}</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="contactWay != null  and contactWay != ''"> and contactWay = #{contactWay}</if>
+        </where>
+    </select>
+
+    <select id="selectMemberById" parameterType="String" resultMap="MemberResult">
+        <include refid="selectMemberVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMember" parameterType="Member" useGeneratedKeys="true" keyProperty="id">
+        insert into member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="intro != null">intro,</if>
+            <if test="image != null">image,</if>
+            <if test="email != null and email != ''">email,</if>
+            <if test="role != null and role != ''">role,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="name != null">name,</if>
+            <if test="contactWay != null">contactWay,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="intro != null">#{intro},</if>
+            <if test="image != null">#{image},</if>
+            <if test="email != null and email != ''">#{email},</if>
+            <if test="role != null and role != ''">#{role},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="name != null">#{name},</if>
+            <if test="contactWay != null">#{contactWay},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMember" parameterType="Member">
+        update member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="role != null and role != ''">role = #{role},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="contactWay != null">contactWay = #{contactWay},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMemberById" parameterType="String">
+        delete from team_member where memberId = #{id}
+        delete from member where id = #{id};
+    </delete>
+
+    <delete id="deleteMemberByIds" parameterType="String">
+        delete from member where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+  <select id="findByEmailAndPassword" resultMap="MemberResult">
+    SELECT * FROM member WHERE email = #{email} AND password = #{password}
+  </select>
+</mapper>

@@ -15,8 +15,11 @@
     </update>
 
     <delete id="deleteTeamById" parameterType="java.lang.Long">
+         DELETE FROM team_member
+         WHERE teamId = #{id};
+
         DELETE FROM team
-        WHERE id = #{id}
+        WHERE id = #{id};
     </delete>
 
     <select id="findTeamById" resultType="com.sdut.laboratorybackmodule.entity.Team" parameterType="java.lang.Long">

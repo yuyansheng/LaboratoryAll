@@ -1,5 +1,7 @@
 <script>
 import axios from "axios";
+import { API_PATH } from "../config";
+import { saveAs } from 'file-saver';
 
 export default {
   data() {
@@ -8,38 +10,98 @@ export default {
     };
   },
   methods: {
-    loadSoftwarePage(){
-      axios.get(this.$baseURL+'/software/all')
-      .then((response)=>{
-        this.softwareList=response.data;
-        console.log(this.softwareList)
-      }).catch((error)=>{
-        console.error('请求数据失败',error)
-      })
+    loadSoftwarePage() {
+      axios.get(API_PATH + '/laboratory/software/list')
+        .then((response) => {
+          console.log(response);
+          this.softwareList = response.data.rows;
+          console.log(this.softwareList);
+        }).catch((error) => {
+        console.error('请求数据失败', error);
+      });
     },
-    download(fileType,fileName){
-      axios({url:this.$baseURL+'/file/download',
-        method:'GET',
+    tansParams(params) {
+      let result = '';
+      for (const propName of Object.keys(params)) {
+        const value = params[propName];
+        var part = encodeURIComponent(propName) + "=";
+        if (value !== null && value !== "" && typeof (value) !== "undefined") {
+          if (typeof value === 'object') {
+            for (const key of Object.keys(value)) {
+              if (value[key] !== null && value[key] !== "" && typeof (value[key]) !== 'undefined') {
+                let params = propName + '[' + key + ']';
+                var subPart = encodeURIComponent(params) + "=";
+                result += subPart + encodeURIComponent(value[key]) + "&";
+              }
+            }
+          } else {
+            result += part + encodeURIComponent(value) + "&";
+          }
+        }
+      }
+      return result;
+    },
+    updateDownloadTimes(index){
+      const today = new Date().toISOString().split('T')[0]; // 获取今天的日期
+      const currentNewsId = this.softwareList[index].id;
+
+
+      const lastTriggeredDownloadTime = JSON.parse(localStorage.getItem('lastTriggeredDownloadTime')) || {};
+
+// 获取当前新闻的最后触发时间
+      const lastTriggerDate = lastTriggeredDownloadTime[currentNewsId];
+      console.log(lastTriggerDate)
+// 如果新闻的最后触发日期与今天相同，则不允许再次触发
+      if (lastTriggerDate === today) {
+        return;
+      }
+
+// 更新 localStorage 中该新闻的最后触发时间为今天
+      lastTriggeredDownloadTime[currentNewsId] = today;
+      localStorage.setItem('lastTriggeredDownloadTime', JSON.stringify(lastTriggeredDownloadTime));
+
+// 更新新闻的阅读次数
+      this.softwareList[index].downloadTimes =  (parseInt(this.softwareList[index].downloadTimes) || 0) + 1;
+      axios.put(API_PATH + '/laboratory/software/update/downloadTimes',null, {
         params:{
-          fileName:fileName,
-          fileType:fileType
-        },
-        responseType:'blob',
-      }).then((response)=>{
-        const blob=new Blob([response.data],{type:'application/octet-stream'})
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
+          downloadTimes: this.softwareList[index].downloadTimes,
+          id: this.softwareList[index].id
+        }
       })
+        .then(response => {
+          console.log('Update successful', response);
+        })
         .catch(error => {
-          console.error("下载失败", error);
+          console.error('Error updating news:', error);
+        });
+    },
+    download(filePath,index) {
+      this.updateDownloadTimes(index)
+      let list = filePath.split("/");
+      let fileName = list[list.length - 1];
+
+      let params = {
+        resource: filePath
+      };
+      let url = API_PATH + "/common/download/resource";
+      axios.post(url, params, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        responseType: 'blob', // 重要：设置返回类型为blob
+        transformRequest: [(params) => { return this.tansParams(params) }] // 参数转化
+      })
+        .then((response) => {
+          const blob = new Blob([response.data]); // 创建 Blob 对象
+          saveAs(blob, fileName); // 使用 file-saver 保存文件
+        })
+        .catch((error) => {
+          console.error(error);
+          this.$message.error('下载文件出现错误，请联系管理员！');
         });
     }
   },
 
   mounted() {
-    this.loadSoftwarePage()
+    this.loadSoftwarePage();
   }
 };
 </script>
@@ -47,7 +109,7 @@ export default {
 <template>
   <div class="software-list">
     <el-card
-      v-for="software in softwareList"
+      v-for="(software,index) in softwareList"
       :key="software.id"
       class="software-card"
       :body-style="{ padding: '20px' }"
@@ -56,40 +118,48 @@ export default {
         <span class="card-title">{{ software.name }}</span>
       </div>
       <p class="card-intro">{{ software.intro }}</p>
+      <div class="card-footer">
+        <span class="download-count">Downloads: {{ software.downloadTimes }}</span>
+        <span class="release-date">Release Date: {{  (new Date(software.releaseDate)).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) }}</span>
+      </div>
       <div class="button-group">
         <el-button
           type="primary"
           size="small"
-          @click="download('SOFTWARE',software.downloadUrl)"
+          @click="download(software.downloadUrl,index)"
           class="download-btn"
         >
-          下载软件
+          Download
         </el-button>
         <el-button
           type="info"
           size="small"
-          @click="download('README_TEXT',software.documentUrl)"
+          @click="download(software.documentUrl,index)"
           class="document-btn"
         >
-          下载说明文档
+          Readme
         </el-button>
       </div>
     </el-card>
   </div>
 </template>
 
-
 <style scoped>
 .software-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  flex-direction: column; /* 纵向排列子元素 */
+  justify-content: flex-start; /* 子元素顶部对齐 */
+  align-items: center; /* 子元素水平居中 */
+  display: flex;
+  width: 60%;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 20px;
   padding: 20px;
 }
 
 .software-card {
+  width: 100%;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.5);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease;
@@ -103,7 +173,7 @@ export default {
   font-size: 20px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .card-title {
@@ -114,6 +184,19 @@ export default {
   color: #666;
   line-height: 1.5;
   margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 15px;
+}
+
+.download-count,
+.release-date {
   font-size: 14px;
 }
 
@@ -130,5 +213,23 @@ export default {
 
 .el-button {
   border-radius: 4px;
+}
+
+.download-btn {
+  background-color: #007BFF;
+  color: white;
+}
+
+.download-btn:hover {
+  background-color: #0056b3;
+}
+
+.document-btn {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.document-btn:hover {
+  background-color: #117a8b;
 }
 </style>

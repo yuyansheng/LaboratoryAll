@@ -1,11 +1,6 @@
 <template>
   <div class="parent">
    <p class="title">Welcome to the IDEA lab!</p>
-    <div v-if="authority.canUse(this.$loginUser.user,1)">
-      <el-button  size="mini" @click="changeEditMod" style="color:#569696;justify-self: flex-end;" plain>{{isEditMod?'preview':'edit'}}</el-button>
-      <el-button  size="mini" @click="saveWelcomeText" style="color:#569696;justify-self: flex-end;" plain>save</el-button>
-      <el-button  size="mini" @click="reset" style="color:#569696;justify-self: flex-end;" plain>reset</el-button>
-    </div>
     <el-divider class="title-divider"></el-divider> <!-- 横向分割线 -->
     <div  class="welcome-text">
       <quill-editor v-if="isEditMod"
@@ -30,6 +25,7 @@ export default {
   },
   data() {
     return {
+      style:null,
       isEditMod:false,
       editorContent: '', // 编辑器内容
       displayContent: '', // 用于展示的内容
@@ -111,7 +107,9 @@ export default {
     },
   },
   mounted() {
-    this.loadContent()
+    this.style = JSON.parse(localStorage.getItem("pageStyle"));
+    this.displayContent = this.style.homePageText
+    this.editorContent = this.displayContent
   }
 };
 </script>

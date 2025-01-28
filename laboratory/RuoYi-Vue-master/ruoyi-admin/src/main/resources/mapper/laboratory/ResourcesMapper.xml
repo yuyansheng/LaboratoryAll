@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.laboratory.mapper.ResourcesMapper">
+
+    <resultMap type="Resources" id="ResourcesResult">
+        <result property="id"    column="id"    />
+        <result property="intro"    column="intro"    />
+        <result property="name"    column="name"    />
+        <result property="releaseDate"    column="releaseDate"    />
+        <result property="content"    column="content"    />
+    </resultMap>
+
+    <sql id="selectResourcesVo">
+        select id, intro, name, releaseDate, content from resources
+    </sql>
+
+    <select id="selectResourcesList" parameterType="Resources" resultMap="ResourcesResult">
+        <include refid="selectResourcesVo"/>
+        <where>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="releaseDate != null "> and releaseDate = #{releaseDate}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+        </where>
+    </select>
+
+    <select id="selectResourcesById" parameterType="String" resultMap="ResourcesResult">
+        <include refid="selectResourcesVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertResources" parameterType="Resources" useGeneratedKeys="true" keyProperty="id">
+        insert into resources
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="intro != null">intro,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="releaseDate != null">releaseDate,</if>
+            <if test="content != null">content,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="intro != null">#{intro},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="releaseDate != null">#{releaseDate},</if>
+            <if test="content != null">#{content},</if>
+         </trim>
+    </insert>
+
+    <update id="updateResources" parameterType="Resources">
+        update resources
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="releaseDate != null">releaseDate = #{releaseDate},</if>
+            <if test="content != null">content = #{content},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteResourcesById" parameterType="String">
+        delete from resources where id = #{id}
+    </delete>
+
+    <delete id="deleteResourcesByIds" parameterType="String">
+        delete from resources where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

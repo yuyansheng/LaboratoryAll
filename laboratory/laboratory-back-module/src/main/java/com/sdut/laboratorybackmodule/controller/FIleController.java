@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 @RestController
@@ -28,56 +30,60 @@ public class FIleController {
     static String uploadDir = "uploads/";
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file,
                                    @RequestParam("fileType") String fileTypeString,
                                    @RequestParam(value = "allowedRepetition" ,defaultValue = "false") boolean allowedRepetition
     ) {
-        // 获取文件名
-        // 默认文件上传成功，并返回状态信
-        // 获取项目的相对路径（存储路径）
+      try {
+        // 获取文件类型
         FileType fileType = FileType.valueOf(fileTypeString);
 
-        String dirPath = uploadDir + fileType.getPath(); // 存储文件的相对路径
+        // 获取当前时间并格式化为 YYYY/MM/dd/HH/mm/ss
+        String timestamp = new SimpleDateFormat("yyyy/MM/dd/HH/mm").format(new Date());
+
+        String filePath = fileType.getPath() + "/" + timestamp;
+
+        // 根据文件类型和时间创建存储路径
+        String dirPath = uploadDir + filePath ; // 存储文件的相对路径
 
         // 获取当前工作目录的绝对路径（基于项目根目录）
         Path uploadDirr = Paths.get(System.getProperty("user.dir"), dirPath);
+        System.out.println(System.getProperty("user.dir"));
 
         // 如果文件夹不存在，则创建
         File dir = uploadDirr.toFile();
         if (!dir.exists()) {
-            dir.mkdirs();
+          dir.mkdirs();
         }
 
         // 获取文件名以及后缀名
         String fileName = file.getOriginalFilename();
-        // 重新生成文件名（根据具体情况生成对应文件名）
-        if(!allowedRepetition){
-            fileName = UUID.randomUUID() + "_" + fileName;
+
+        // 如果不允许重复文件名，重新生成文件名
+        if (!allowedRepetition) {
+          fileName = UUID.randomUUID() + "_" + fileName;
         }
 
         // 创建文件保存的完整路径
         File destFile = new File(uploadDirr.toFile(), fileName);
 
-        try {
-            // 将文件保存到指定路径
-            file.transferTo(destFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-                // 上传失败，返回失败信息
-            return "File upload failed: " + e.getMessage();  //
-        }
+        // 保存文件到指定路径
+        file.transferTo(destFile);
 
-        // 携带上传状态信息回调到文件上传页面
-        return fileName;
+        // 返回上传成功的响应，包含文件名和 HTTP 状态 200
+        return ResponseEntity.status(HttpStatus.OK).body("{\"filePath\":\"" + filePath+"/"+fileName + "\"}");
+      } catch (Exception e) {
+        // 捕获异常并返回错误响应，带有 HTTP 状态 500
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\":\"File upload failed: " + e.getMessage() + "\"}");
+      }
     }
 
     // 小文件加载
     @GetMapping("/load")
-    public ResponseEntity<byte[]> loadFile(@RequestParam("fileName") String fileName,
-                                           @RequestParam("fileType") String fileTypeString) {
+    public ResponseEntity<byte[]> loadFile(@RequestParam("fileName") String fileName) {
         // 文件存储目录
-        FileType filetype = FileType.valueOf(fileTypeString);
-        String fileDir = uploadDir + filetype.getPath();
+        String fileDir = uploadDir;
         File dir = new File(fileDir);
         if (!dir.exists()) {
             return ResponseEntity.status(404).body(null); // 文件未找到

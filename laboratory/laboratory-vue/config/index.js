@@ -6,11 +6,19 @@ const path = require('path')
 
 module.exports = {
   dev: {
-
+    proxyTable: {
+      '/api': {
+        target: ' http://localhost:9090', // 后端接口地址
+        changeOrigin: true,            // 是否跨域
+        pathRewrite: {
+          '/api': '', // 这里会将 /api 重写为空，使得它被忽略
+        },
+        secure: false                  // 如果是 https 的请求，设置为 false
+      }
+    },
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -20,7 +28,7 @@ module.exports = {
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
 
-    
+
     /**
      * Source Maps
      */

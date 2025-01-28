@@ -10,6 +10,8 @@ import team from '@/views/team'
 import newsPage from '@/views/newsPage'
 import user from '@/views/user'
 import  resources from '@/views/resources'
+import contact from "../views/contact.vue";
+import ResourceDetail from "../views/ResourceDetail.vue";
 Vue.use(Router)
 
 export default new Router({
@@ -61,6 +63,17 @@ export default new Router({
         canAdd:true,
         formType:'software'
       }
+    },
+    {
+      path:'/contact',
+      name:'contact',
+      component: contact
+    },
+    {
+      path: '/resource/:id',
+      name: 'ResourceDetail',
+      component: ResourceDetail,
+      props: true, // 使 id 可以作为 prop 传递给组件
     },
     {
       path: '/team',

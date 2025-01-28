@@ -40,10 +40,9 @@ export default {
     formData: {
       type: Object,
       required: false,
-      default: () => ({})  // 使用工厂函数返回默认值
+      default: () => ({})
     }
   },
-
   data() {
     return {
       pageShow:false

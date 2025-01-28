@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.laboratory.mapper.TeamMemberMapper">
+
+    <resultMap type="TeamMember" id="TeamMemberResult">
+        <result property="teamId"    column="teamId"    />
+        <result property="memberId"    column="memberId"    />
+    </resultMap>
+
+    <sql id="selectTeamMemberVo">
+        select teamId, memberId from team_member
+    </sql>
+
+    <select id="selectTeamMemberList" parameterType="TeamMember" resultMap="TeamMemberResult">
+        <include refid="selectTeamMemberVo"/>
+        <where>
+            <if test="teamId != null  and teamId != ''"> and teamId = #{teamId}</if>
+            <if test="memberId != null  and memberId != ''"> and memberId = #{memberId}</if>
+        </where>
+    </select>
+
+    <select id="selectTeamMemberByTeamId" parameterType="String" resultMap="TeamMemberResult">
+        <include refid="selectTeamMemberVo"/>
+        where teamId = #{teamId}
+    </select>
+
+    <insert id="insertTeamMember" parameterType="TeamMember">
+        insert into team_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">teamId,</if>
+            <if test="memberId != null">memberId,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">#{teamId},</if>
+            <if test="memberId != null">#{memberId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTeamMember" parameterType="TeamMember">
+        update team_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="memberId != null">memberId = #{memberId},</if>
+        </trim>
+        where teamId = #{teamId}
+    </update>
+
+    <delete id="deleteTeamMemberByTeamId" parameterType="String">
+        delete from team_member where teamId = #{teamId}
+    </delete>
+
+    <delete id="deleteTeamMemberByTeamIds" parameterType="String">
+        delete from team_member where teamId in
+        <foreach item="teamId" collection="array" open="(" separator="," close=")">
+            #{teamId}
+        </foreach>
+    </delete>
+</mapper>

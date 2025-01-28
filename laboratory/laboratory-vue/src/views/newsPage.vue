@@ -1,6 +1,7 @@
 <script >
 import axios from "axios";
 import authority from "../utils/authority";
+import {API_PATH} from "../config";
 
 
 export default {
@@ -57,6 +58,9 @@ export default {
     };
   },
   methods: {
+    API_PATH() {
+      return API_PATH
+    },
     timestampToDate(timestamp){
       let date = new Date(timestamp)
       return date.toLocaleDateString()
@@ -67,8 +71,10 @@ export default {
     },
     handleSuccess(response, file, fileList) {
       console.log('文件上传成功，URL为：', response);
-      this.tempNews.image = response;  // 假设 response 包含图片的文件名或路径
-      this.loadNewsImage();  // 直接调用loadNewsImage并更新tempImageURL
+      this.tempNews.image = response.filePath;  // response 包含图片的文件名或路径
+      console.log(this.tempNews.image)
+      console.log(this.$baseURL)
+
     },
     beforeUpload(file) {
       // 可以在这里添加文件上传前的处理，如文件大小、格式的检查
@@ -78,51 +84,26 @@ export default {
     changeEditMod(){
       this.isEditMod = !this.isEditMod
       console.log(this.tempImageURL)
-      if(this.tempImageURL===""&&this.isEditMod){
-        this.loadNewsImage()
-      }
     },
 
     loadNewsPage(newsId) {
-      axios.get(this.$baseURL+`/news/getNews/${newsId}`)
+      axios.get(API_PATH+`/laboratory/news/${newsId}`)
         .then((response)=>{
-          this.news=response.data
+          console.log(response)
+          this.news=response.data.data
           console.log(this.news)
           this.tempNews = this.news;
+          axios.get(API_PATH+'/laboratory/member/'+this.news.authorId).then(response=>{
+            this.$set(this.news,'member',response.data.data)
+          })
         }).catch((error)=>{
         console.error('请求数据失败',error)
       })
     },
-    async loadNewsImage() {
-      try {
-        const response = await axios.get(this.$baseURL+'/file/load', {
-          params: {
-            fileName: this.tempNews.image,
-            fileType: "NEWS_IMAGE"
-          },
-          responseType: 'arraybuffer',  // 返回二进制数据
-        });
-
-        const contentType = response.headers['content-type'];
-        const base64Image = this.arrayBufferToBase64(response.data);
-        this.tempImageURL = `data:${contentType};base64,${base64Image}`; // 更新 tempImageURL
-      } catch (e) {
-        console.error("文件加载失败", e);
-        this.tempImageURL = ""; // 加载失败时清空 tempImageURL
-      }
-    },
-    arrayBufferToBase64(buffer) {
-      const byteArray = new Uint8Array(buffer);
-      let binary = '';
-      for (let i = 0; i < byteArray.length; i++) {
-        binary += String.fromCharCode(byteArray[i]);
-      }
-      return window.btoa(binary); // 转换为 Base64
-    }
   },
 
   created() {
-    console.log("asdfsdfasdfasdfasfsadf")
+    console.log()
   },
   mounted(){
     if(!this.$route.params.hasOwnProperty('newsId')){
@@ -140,17 +121,19 @@ export default {
   <div class="parent">
     <div class="avatar-username">
       <div>
-        <el-avatar :size="30" src="@/assets/text.png"></el-avatar>
+        <el-avatar :size="30" :src="API_PATH()+news.member.image"></el-avatar>
       </div>
-      <div class="text">name</div>
-      <div class="text">{{timestampToDate(this.news.releaseTime)}}</div>
+      <div class="text">{{news.member.name}}</div>
+      <div class="text">{{(new Date(news.releaseTime)).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}}</div>
       <el-button v-if="authority.canUse(this.$loginUser.user,1)" size="mini" @click="changeEditMod" style="color:#569696;justify-self: flex-end;" plain>{{isEditMod?'预览':'编辑'}}</el-button>
     </div>
+
       <div v-if="!isEditMod">
         <div  class="title">{{this.tempNews.title}}</div>
-        <div class="text">Updated: {{timestampToDate(this.news.updateTime)}}</div>
+        <div class="text">Updated: {{(new Date(news.updateTime)).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}}</div>
         <div class="main-body" v-html="this.tempNews.content"></div>
       </div>
+
       <div v-if="isEditMod">
         <el-form label-position="left" :model="tempNews" label-width="80px">
         <el-form-item label="title">
@@ -171,7 +154,7 @@ export default {
               :data="newsUploadData"
               :on-success="handleSuccess"
               :before-upload="beforeUpload">
-              <img v-if="tempImageURL" :src="tempImageURL" class="news-image" />
+              <img v-if="this.tempNews.image" :src="this.$baseURL+'/'+this.tempNews.image" class="news-image" />
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>
@@ -219,7 +202,7 @@ export default {
   border: 1px solid darkgray;
   background-color: rgba(255, 255, 255, 0.5);
   display: flex;
-  justify-content: flex-start; /* 元素水平靠左 */
+  flex-direction: column;
   align-items: flex-start; /* 垂直靠上 */
   width: 55%;
   min-height: 800px;

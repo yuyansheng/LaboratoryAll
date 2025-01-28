@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.laboratory.mapper.NewsMapper">
+
+    <resultMap type="News" id="NewsResult">
+        <result property="id"    column="id"    />
+        <result property="updateTime"    column="updateTime"    />
+        <result property="image"    column="image"    />
+        <result property="title"    column="title"    />
+        <result property="releaseTime"    column="releaseTime"    />
+        <result property="content"    column="content"    />
+        <result property="authorId"    column="authorId"    />
+        <result property="intro"    column="intro"    />
+        <result property="readTimes"    column="readTimes"    />
+        <result property="isDelete"    column="isDelete"    />
+    </resultMap>
+
+    <sql id="selectNewsVo">
+        select id, updateTime, image, title, releaseTime, content, authorId, intro, readTimes, isDelete from news
+    </sql>
+
+    <select id="selectNewsList" parameterType="News" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        <where>
+            <if test="updateTime != null "> and updateTime = #{updateTime}</if>
+            <if test="image != null  and image != ''"> and image = #{image}</if>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+          <if test="releaseTime != null "> and releaseTime &lt;= #{releaseTime}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="authorId != null  and authorId != ''"> and authorId = #{authorId}</if>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="readTimes != null  and readTimes != ''"> and readTimes = #{readTimes}</if>
+            <if test="isDelete != null "> and isDelete = #{isDelete}</if>
+        </where>
+    </select>
+
+    <select id="selectNewsById" parameterType="String" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertNews" parameterType="News" useGeneratedKeys="true" keyProperty="id">
+        insert into news
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="updateTime != null">updateTime,</if>
+            <if test="image != null">image,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="releaseTime != null">releaseTime,</if>
+            <if test="content != null">content,</if>
+            <if test="authorId != null">authorId,</if>
+            <if test="intro != null">intro,</if>
+            <if test="readTimes != null and readTimes != ''">readTimes,</if>
+            <if test="isDelete != null">isDelete,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="image != null">#{image},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="releaseTime != null">#{releaseTime},</if>
+            <if test="content != null">#{content},</if>
+            <if test="authorId != null">#{authorId},</if>
+            <if test="intro != null">#{intro},</if>
+            <if test="readTimes != null and readTimes != ''">#{readTimes},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+         </trim>
+    </insert>
+
+    <update id="updateNews" parameterType="News">
+        update news
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="updateTime != null">updateTime = #{updateTime},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="releaseTime != null">releaseTime = #{releaseTime},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="authorId != null">authorId = #{authorId},</if>
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="readTimes != null and readTimes != ''">readTimes = #{readTimes},</if>
+            <if test="isDelete != null">isDelete = #{isDelete},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteNewsById" parameterType="String">
+        delete from news where id = #{id}
+    </delete>
+
+    <delete id="deleteNewsByIds" parameterType="String">
+        delete from news where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

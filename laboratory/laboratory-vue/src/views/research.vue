@@ -1,5 +1,6 @@
 <script>
 import axios from "axios";
+import {API_PATH} from "../config";
 
 export default {
   data(){
@@ -17,11 +18,14 @@ export default {
   },
 
   methods:{
+    goToUrl(url) {
+      window.open(url, '_blank');
+    },
     loadAllResearch() {
       axios
-        .get(this.$baseURL + '/research/all')
+        .get(API_PATH + '/laboratory/research/list')
         .then((response) => {
-          this.researches = response.data;
+          this.researches = response.data.rows;
           console.log(this.researches);
         })
         .catch((error) => {
@@ -37,65 +41,59 @@ export default {
 </script>
 
 <template>
-  <div class="parent">
-    <div v-for="(item,index) in researches" :key="index" class="left-alignment">
-      <div style="justify-items: flex-start;display: flex;align-items: center;">
-        <div class="dot"></div>
-        <a class="name" :href="item.url">{{item.name}}</a>
-      </div>
-      <div style="justify-items: flex-start;display: flex;width: 100%;margin-top: 5px">
-        <div class="intro-dot"></div>
-        <div class="intro">{{item.intro}}</div>
-      </div>
-      <div class="begin-time">{{item.beginTimes}}</div>
-    </div>
-  </div>
+    <el-container>
+      <el-main>
+        <el-table :data="researches" stripe>
+          <el-table-column prop="name" label="name" width="200">
+            <template slot-scope="scope">
+              <el-button type="text" @click="goToUrl(scope.row.url)">
+                {{ scope.row.name }}
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column prop="intro" label="intro" width="400"></el-table-column>
+          <el-table-column prop="beginTimes" label="begin times" width="200">
+            <template slot-scope="scope">
+              <div>
+                {{(new Date(scope.row.beginTimes)).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}}
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-main>
+    </el-container>
 </template>
 
+<style>
+/* 加入更强的选择器 */
+.el-container .el-main .el-table,
+.el-container .el-table__expanded-cell{
+  background-color: transparent !important;
+  margin: 0px;
+  border-radius: 8px;
+}
+
+.el-container .el-table th,
+.el-container .el-table tr,
+.el-container .el-table td {
+  background-color: transparent !important;
+}
+</style>
+
 <style scoped>
-.dot {
-  width: 8px;
-  height: 8px;
-  background-color: black;
-  border-radius: 50%;
+/* 表格的其他自定义样式 */
+.el-button {
+  color: #409eff !important;
+  text-decoration: underline !important;
 }
-.intro-dot {
-  margin-left: 20px;
-  margin-top: 9px;
-  width: 6px;
-  height: 6px;
-  border: 2px solid black;
-  border-radius: 50%;
+
+.el-button:hover {
+  color: #66b1ff !important;
 }
-.begin-time{
-  color: black;
-  margin-top: 5px;
-}
-.name{
-  margin-left: 10px;
-  color: #569696;
-  font-size: 20px;
-}
-.intro {
-  width: 60%;
-  word-wrap: break-word;
-  color: black;
-  margin-left: 8px;
-  font-size: 18px;
-}
-.parent {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-start; /* 元素水平靠左 */
-  align-items: flex-start; /* 垂直靠上 */
-  width: 55%;
-  padding: 40px 60px;
-}
-.left-alignment {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
+
+.el-header {
+  background-color: rgba(245, 245, 245, 0.4); /* 添加透明度 */
+  padding: 20px;
+  text-align: center;
 }
 </style>

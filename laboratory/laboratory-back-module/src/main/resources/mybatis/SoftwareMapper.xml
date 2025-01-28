@@ -1,41 +1,81 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sdut.laboratorybackmodule.mapper.SoftwareMapper">
 
-    <resultMap id="SoftwareResultMap" type="com.sdut.laboratorybackmodule.entity.Software">
-        <id property="id" column="id" />
-        <result property="name" column="name" />
-        <result property="intro" column="intro" />
-        <result property="downloadUrl" column="downloadUrl" />
-        <result property="documentUrl" column="documentUrl" />
+    <resultMap type="Software" id="SoftwareResult">
+        <result property="id"    column="id"    />
+        <result property="intro"    column="intro"    />
+        <result property="downloadUrl"    column="downloadUrl"    />
+        <result property="documentUrl"    column="documentUrl"    />
+        <result property="name"    column="name"    />
+        <result property="downloadTimes"    column="downloadTimes"    />
+        <result property="releaseDate"    column="releaseDate"    />
     </resultMap>
 
-    <insert id="insertSoftware" parameterType="com.sdut.laboratorybackmodule.entity.Software">
-        INSERT INTO software (name, intro, downloadUrl, documentUrl)
-        VALUES (#{name}, #{intro}, #{downloadUrl}, #{documentUrl})
+    <sql id="selectSoftwareVo">
+        select id, intro, downloadUrl, documentUrl, name, downloadTimes, releaseDate from software
+    </sql>
+
+    <select id="selectSoftwareList" parameterType="Software" resultMap="SoftwareResult">
+        <include refid="selectSoftwareVo"/>
+        <where>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="downloadUrl != null  and downloadUrl != ''"> and downloadUrl like concat('%', #{downloadUrl}, '%')</if>
+            <if test="documentUrl != null  and documentUrl != ''"> and documentUrl like concat('%', #{documentUrl}, '%')</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="downloadTimes != null  and downloadTimes != ''"> and downloadTimes = #{downloadTimes}</if>
+            <if test="releaseDate != null "> and releaseDate = #{releaseDate}</if>
+        </where>
+    </select>
+
+    <select id="selectSoftwareById" parameterType="String" resultMap="SoftwareResult">
+        <include refid="selectSoftwareVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSoftware" parameterType="Software" useGeneratedKeys="true" keyProperty="id">
+        insert into software
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="intro != null">intro,</if>
+            <if test="downloadUrl != null">downloadUrl,</if>
+            <if test="documentUrl != null">documentUrl,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="downloadTimes != null">downloadTimes,</if>
+            <if test="releaseDate != null">releaseDate,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="intro != null">#{intro},</if>
+            <if test="downloadUrl != null">#{downloadUrl},</if>
+            <if test="documentUrl != null">#{documentUrl},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="downloadTimes != null">#{downloadTimes},</if>
+            <if test="releaseDate != null">#{releaseDate},</if>
+         </trim>
     </insert>
 
-    <select id="getSoftwareById" resultMap="SoftwareResultMap">
-        SELECT * FROM software WHERE id = #{id}
-    </select>
-
-    <select id="getAllSoftware" resultMap="SoftwareResultMap">
-        SELECT * FROM software
-    </select>
-
-    <update id="updateSoftware" parameterType="com.sdut.laboratorybackmodule.entity.Software">
-        UPDATE software SET
-                            name = #{name},
-                            intro = #{intro},
-                            downloadUrl = #{downloadUrl},
-                            documentUrl = #{documentUrl}
-        WHERE id = #{id}
+    <update id="updateSoftware" parameterType="Software">
+        update software
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="downloadUrl != null">downloadUrl = #{downloadUrl},</if>
+            <if test="documentUrl != null">documentUrl = #{documentUrl},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="downloadTimes != null">downloadTimes = #{downloadTimes},</if>
+            <if test="releaseDate != null">releaseDate = #{releaseDate},</if>
+        </trim>
+        where id = #{id}
     </update>
 
-    <delete id="deleteSoftware" parameterType="java.lang.Long">
-        DELETE FROM software WHERE id = #{id}
+    <delete id="deleteSoftwareById" parameterType="String">
+        delete from software where id = #{id}
     </delete>
 
+    <delete id="deleteSoftwareByIds" parameterType="String">
+        delete from software where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
