@@ -6,12 +6,35 @@ import { saveAs } from 'file-saver';
 export default {
   data() {
     return {
+      pageSize:5,
+      pageNum:1,
+      totalNewsCount:0,
+      queryName:"",
       softwareList: []
     };
   },
   methods: {
+    handlePageChange(pageNum){
+      this.pageNum=pageNum
+      console.log(this.pageNum+" "+this.pageSize)
+      this.expandedPublication=null
+      this.loadSoftwarePage()
+      this.$refs.resources.scrollIntoView({ behavior: 'smooth' });  // 平滑滚动到页面顶部
+    },
+    handleSearch(){
+      this.loadSoftwarePage()
+    },
     loadSoftwarePage() {
-      axios.get(API_PATH + '/laboratory/software/list')
+      axios.get(API_PATH + '/laboratory/software/list'
+      ,{
+        params:{
+          pageNum:this.pageNum,
+            pageSize:this.pageSize,
+            name:this.queryName,
+            orderByColumn:'releasedate',
+            isAsc:'descending',
+        }
+      })
         .then((response) => {
           console.log(response);
           this.softwareList = response.data.rows;
@@ -108,6 +131,13 @@ export default {
 
 <template>
   <div class="software-list">
+      <div class="search-container">
+        <el-input
+          v-model="queryName"
+          placeholder="Search by name"
+          class="search-input"/>
+        <el-button @click="handleSearch" class="search-button">Search</el-button>
+      </div>
     <el-card
       v-for="(software,index) in softwareList"
       :key="software.id"
@@ -141,10 +171,41 @@ export default {
         </el-button>
       </div>
     </el-card>
+    <div class="left-alignment">
+      <el-pagination
+        layout="prev, pager, next"
+        @current-change="handlePageChange"
+        :page-size="this.pageSize"
+        :current-page="this.pageNum"
+        :total="totalNewsCount">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.left-alignment {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+.search-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.search-input {
+  width: 200px;
+  margin-right: 10px;
+}
+
+.search-button {
+  height: 36px;
+}
 .software-list {
   flex-direction: column; /* 纵向排列子元素 */
   justify-content: flex-start; /* 子元素顶部对齐 */
@@ -170,10 +231,9 @@ export default {
 }
 
 .card-header {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 10px;
 }
 
 .card-title {

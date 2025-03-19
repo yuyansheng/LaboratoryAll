@@ -7,19 +7,39 @@ export default {
   components: { user },
   data() {
     return {
+      pageSize:5,
+      pageNum:1,
+      totalNewsCount:0,
+      queryName:"",
       drawer: false,
       userId: -1,
       teams: [],
     };
   },
   methods: {
+    handlePageChange(pageNum){
+      this.pageNum=pageNum
+      console.log(this.pageNum+" "+this.pageSize)
+      this.expandedPublication=null
+      this.loadAllTeam()
+      this.$refs.resources.scrollIntoView({ behavior: 'smooth' });  // 平滑滚动到页面顶部
+    },
+    handleSearch(){
+      this.loadAllTeam()
+    },
     openMemberInfo(memberId) {
       this.userId = memberId;
       this.drawer = true;
     },
     loadAllTeam() {
       axios
-        .get(API_PATH + '/laboratory/team/list')
+        .get(API_PATH + '/laboratory/team/list',{
+          params:{
+            pageNum:this.pageNum,
+            pageSize:this.pageSize,
+            name:this.queryName,
+          }
+        })
         .then((response) => {
           this.teams = response.data.rows;
           console.log(this.teams);
@@ -67,7 +87,14 @@ export default {
 </script>
 
 <template>
-  <div class="parent">
+  <div class="team-list">
+    <div class="search-container">
+      <el-input
+        v-model="queryName"
+        placeholder="Search by name"
+        class="search-input"/>
+      <el-button @click="handleSearch" class="search-button">Search</el-button>
+    </div>
     <el-drawer
       :append-to-body="true"
       :modal-append-to-body="false"
@@ -77,62 +104,105 @@ export default {
       <user v-if="drawer" :user-id="userId" user-page-mode="visit"/>
     </el-drawer>
 
-    <el-row v-for="(item, index) in teams" :key="index" class="team-card" :gutter="20">
-      <el-col :span="24">
-        <el-card class="team-card-content" shadow="always">
-          <div class="team-info">
-            <div class="team-details">
-              <div class="team-name">{{ item.name }}</div>
-              <div class="team-leader">
-                <strong>leader:</strong>
-                <span
-                  style="text-decoration-line: underline; cursor: pointer"
-                  @click="openMemberInfo(item.teamLeaderId)">
+
+      <el-row v-for="(item, index) in teams"  justify="center" :key="index" class="team-card" :gutter="20">
+        <el-col :span="24">
+          <el-card class="team-card-content" shadow="always">
+            <div slot="header" class="card-header">
+              <span class="card-title">{{ item.name }}</span>
+            </div>
+            <div class="team-info">
+              <div class="team-details">
+                <div class="team-leader">
+                  <strong>leader:</strong>
+                  <span
+                    style="text-decoration-line: underline; cursor: pointer"
+                    @click="openMemberInfo(item.teamLeaderId)">
                   {{ item.teamLeader }}
                 </span>
-              </div>
-              <div class="team-member">
-                <div class="team-member-label"><strong>members:</strong></div>
-                <div class="members" style="margin-left: 20px">
-                  <el-button v-if="item.members.length !== 0"
-                             v-for="(member, idx) in item.members"
-                             :key="idx"
-                             class="member"
-                             @click="openMemberInfo(member.memberId)"
-                             style="font-size: 18px"
-                             type="text">
-                    {{ member.name }}
-                  </el-button>
-                  <div v-if="item.members.length === 0">not have</div>
                 </div>
+                <div v-if="item.members.length !== 0" class="team-member">
+                  <div class="team-member-label"><strong>members:</strong></div>
+                  <div  class="members" style="margin-left: 20px">
+                    <el-button v-if="item.members.length !== 0"
+                               v-for="(member, idx) in item.members"
+                               :key="idx"
+                               class="member"
+                               @click="openMemberInfo(member.memberId)"
+                               style="font-size: 18px"
+                               type="text">
+                      {{ member.name }}
+                    </el-button>
+                    <div v-if="item.members.length === 0">not have</div>
+                  </div>
+                </div>
+                <div>contact way</div>
+                <div class="team-email">{{ item.email }}</div>
               </div>
-              <div class="team-email">{{ item.email }}</div>
-            </div>
 
-            <div class="team-intro">
-              <strong>intro: </strong>{{ item.intro }}
-            </div> <!-- 将简介放在右侧 -->
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+              <div class="team-intro">
+                <strong>intro: </strong>{{ item.intro }}
+              </div> <!-- 将简介放在右侧 -->
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+    <div class="left-alignment">
+      <el-pagination
+        layout="prev, pager, next"
+        @current-change="handlePageChange"
+        :page-size="this.pageSize"
+        :current-page="this.pageNum"
+        :total="totalNewsCount">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.parent {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  display: flex;
+.team-list{
   flex-direction: column; /* 纵向排列子元素 */
   justify-content: flex-start; /* 子元素顶部对齐 */
   align-items: center; /* 子元素水平居中 */
-  width: 55%;
-  padding: 40px 60px;
+  width: 70%;
+  padding: 20px;
+}
+.left-alignment {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+.search-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.search-input {
+  width: 200px;
+  margin-right: 10px;
+}
+
+.search-button {
+  height: 36px;
+}
+.card-header {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  padding: 0;
+}
+.card-title {
+  font-size: 1.4em;
 }
 
 .team-card {
-  width: 100%;
+  width: 90%;
+  justify-self: center;
   margin-bottom: 20px;
 }
 
@@ -151,12 +221,6 @@ export default {
 
 .team-details {
   flex: 1; /* 左侧部分占满剩余空间 */
-}
-
-.team-name {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
 }
 
 .team-leader {

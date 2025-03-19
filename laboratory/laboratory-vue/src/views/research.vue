@@ -68,7 +68,7 @@ export default {
 /* 加入更强的选择器 */
 .el-container .el-main .el-table,
 .el-container .el-table__expanded-cell{
-  background-color: transparent !important;
+  background-color: rgba(255,255,255,0.6) !important;
   margin: 0px;
   border-radius: 8px;
 }

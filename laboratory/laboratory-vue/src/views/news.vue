@@ -39,10 +39,12 @@ export default {
       this.pageNum=pageNum
       console.log(this.pageNum+" "+this.pageSize)
       this.loadNews()
+      this.$refs.news.scrollIntoView({ behavior: 'smooth' });
     },
     API_PATH() {
       return API_PATH
     },
+    /// 加载新闻
     loadNews() {
       console.log("!!!!"+process.env.VUE_APP_API_PATH)
       axios.get(API_PATH+'/laboratory/news/list',
@@ -52,8 +54,8 @@ export default {
             pageNum:this.pageNum,
             releaseTime:new Date().toISOString().split('T')[0],
             orderByColumn:'releasetime',
+            isAsc:'descending',
             isDelete:'0',
-            isAsc:'descending'
           },
         })
         .then((response)=>{
@@ -119,7 +121,7 @@ export default {
 </script>
 
 <template>
-  <div class="parent">
+  <div class="parent" ref="news">
     <div v-for="(item,index) in news" :key="index" class="news-parent" @click="handleClick(index,item.id)">
       <img class="news-image" :src="API_PATH() + item.image" alt="news-image">
       <div class="news-data">
@@ -231,6 +233,8 @@ export default {
   margin-bottom: 10px;
 }
 .left-alignment {
+  margin-top: 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: flex-start;
   width: 100%;
